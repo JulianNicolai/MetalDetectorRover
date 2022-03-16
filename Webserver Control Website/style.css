@@ -1,0 +1,120 @@
+body {
+    font-family: Roboto,Arial,Helvetica,sans-serif;
+    background: #181818;
+    color: #EFEFEF;
+    font-size: 16px
+}
+
+#stream {
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    object-fit: contain;
+    width: 100%;
+    height: auto;
+    max-height: 75vh;
+}
+
+#stream-container {
+    display: flex;
+    height: 100%;
+    justify-content:center;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.svg-container {
+    float: left;
+
+}
+
+#flash {
+    height: 25vh;
+    width: auto;
+}
+
+.grid-container {
+    display: block;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.grid-item {
+    padding: 0;
+    margin: 0;
+    min-height: 1px;
+}
+
+#analog-control {
+    display: inline-block;
+    height: 25vh;
+    width: auto;
+}
+
+.svg-container {
+    display: inline-block;
+    /* background-color: coral; */
+    height: 100%;
+    width: auto;
+}
+
+#map {
+    /* background-color: aqua; */
+    float: left;
+    height: 75vh;
+    width: 50vw;
+}
+
+#camera {
+    position: relative;
+    /* background-color: red; */
+    float: left;
+    height: 75vh;
+    width: 50vw;
+}
+
+#controls {
+    /* background-color: pink; */
+    background-color: #242424;
+    float: left;
+    height: 25%;
+    max-height: 25vh;
+    width: 50vw;
+}
+
+#detections {
+    /* background-color: pink; */
+    /* background-color: #242424; */
+    background-color: #242424;
+    display: flex;
+    align-items: stretch;
+    height: 25vh;
+    width: 50vw;
+}
+
+#console {
+    margin: 10px 10px 10px 10px;
+    height: calc(100% - 20px);
+    width: 100%;
+    overflow-y: scroll;
+}
+
+.console-entry0, .console-entry1 {
+    padding: 3px;
+}
+
+.console-entry0 {
+    background-color: #4e4e4e;
+}
+
+.console-entry1 {
+    background-color: #3b3b3b;
+}

@@ -1,0 +1,39 @@
+<svg width="500px" height="100px" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        #waiting {
+            transform-origin: center center;
+            animation: waiting-anim 4s ease-in-out 0.5s infinite;
+        }
+
+        @keyframes waiting-anim {
+            0% {transform: scale(1);}
+            50% {transform: scale(5);}
+            100% {transform: scale(1);}
+        }
+
+        #active {
+            display: none;
+        }
+
+        #inactive {
+            display: block;
+        }
+    </style>
+    
+    <g>
+        <circle cx="60" cy="60" r="50" fill="#3b3b3b"/>
+        <line x1="60" y1="109.5" x2="60" y2="10.5" stroke-width="1" stroke="#8d8d8d" stroke-linecap="round"/>
+        <line x1="109.5" y1="60" x2="10.5" y2="60" stroke-width="1" stroke="#8d8d8d" stroke-linecap="round"/>
+    </g>
+
+    <g id="active">
+        <line id="dir-line" x1="60" y1="60" x2="70" y2="30" stroke-width="3" stroke="#ad0202" stroke-linecap="round"/>
+        <circle id="dir-dot" cx="70" cy="30" r="4" fill="#ad0202"/>
+    </g>
+
+    <g id="inactive">
+        <circle id="waiting" cx="60" cy="60" r="8" fill="#0b58fd"/>
+    </g>
+    
+    
+</svg>

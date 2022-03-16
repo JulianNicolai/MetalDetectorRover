@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Control Board</title>
+        <link rel="stylesheet" href="./style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+        <script src="./script.js"></script>
+    </head>
+
+    <body>
+        <section class="main">
+            <div class="grid-container">
+                <div id="map" class="grid-item"></div>
+                <div id="camera" class="grid-item">
+                    <div id="stream-container" class="image-container">
+                        <img id="stream" src="http://192.168.0.242:81/stream">
+                    </div>
+                </div>
+                <div id="controls" class="grid-item">
+                    <div class="svg-container">
+                        <svg id="analog-control" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <style>
+                                #waiting {
+                                    transform-origin: center center;
+                                    animation: waiting-anim 4s ease-in-out 0.5s infinite;
+                                }
+                        
+                                @keyframes waiting-anim {
+                                    0% {transform: scale(1);}
+                                    50% {transform: scale(5);}
+                                    100% {transform: scale(1);}
+                                }
+                        
+                                #active-controller {
+                                    display: none;
+                                }
+                        
+                                #inactive-controller {
+                                    display: block;
+                                }
+                            </style>
+                            
+                            <g>
+                                <circle cx="60" cy="60" r="50" fill="#3b3b3b"/>
+                                <line x1="60" y1="109.5" x2="60" y2="10.5" stroke-width="1" stroke="#8d8d8d" stroke-linecap="round"/>
+                                <line x1="109.5" y1="60" x2="10.5" y2="60" stroke-width="1" stroke="#8d8d8d" stroke-linecap="round"/>
+                            </g>
+                        
+                            <g id="active-controller">
+                                <line id="dir-line" x1="60" y1="60" x2="70" y2="30" stroke-width="3" stroke="#ad0202" stroke-linecap="round"/>
+                                <circle id="dir-dot" cx="70" cy="30" r="4" fill="#ad0202"/>
+                            </g>
+                        
+                            <g id="inactive-controller">
+                                <circle id="waiting" cx="60" cy="60" r="8" fill="#0b58fd"/>
+                            </g>
+                            
+                            
+                        </svg>
+                    </div>
+                    
+                    <div class="svg-container">
+                        <svg id="flash" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <circle id="flash-cir" cx="12" cy="60" r="12" fill="#3b3b3b"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="detections" class="grid-item">
+                    <div id="console">
+
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+        <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6AtQuZW2kxBTPSWAjZfsPgW0ce68oi2s&callback=initMap&v=weekly" async></script> -->
+    </body>
+</html>
