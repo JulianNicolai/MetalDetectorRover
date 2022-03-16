@@ -31,7 +31,22 @@ body {
 
 .svg-container {
     float: left;
+}
 
+.location-button {
+    font-family: Roboto, Arial, Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border-color: rgb(201, 201, 201);
+    border-style: solid;
+    background-color: white;
+    color: rgb(61, 61, 61);
+}
+
+.location-button:hover {
+    cursor: pointer;
 }
 
 #flash {

@@ -11,10 +11,6 @@ let consoleDisplay;
 let consoleColorState = 0;
 let intervals = [];
 
-navigator.geolocation.getCurrentPosition(result => {
-    position = result;
-});
-
 function displayConsole(eventType, eventText) {
     eventType = "EVENT";
     eventText = "Some text about the event.";
@@ -51,10 +47,37 @@ function update() {
 }
 
 function initMap() {
+    coords = {latitude: 45.384698, longitude: -75.6983645};
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: position.coords.latitude, lng: position.coords.longitude },
+        center: { lat: coords.latitude, lng: coords.longitude },
         zoom: 18,
     });
+
+    infoWindow = new google.maps.InfoWindow();
+
+    const locationButton = document.createElement("button");
+
+    locationButton.textContent = "Current Location";
+    locationButton.classList.add("location-button");
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+    locationButton.addEventListener("click", () => {
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+
+                map.setCenter(pos);
+                }, () => {handleLocationError(true, infoWindow, map.getCenter());}
+            );
+        } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+        }
+    });
+
 }
 
 function gamepadConnect(e) {
