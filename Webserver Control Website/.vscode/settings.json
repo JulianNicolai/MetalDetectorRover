@@ -1,0 +1,9 @@
+{
+    "terminal.integrated.shell.windows": "C:\\Users\\Julian\\AppData\\Roaming\\ActiveState\\bin\\state.exe",
+    "terminal.integrated.shellArgs.windows": [
+        "activate",
+        "--confirm-exit-on-error",
+        "--non-interactive",
+        "--output=simple"
+    ]
+}

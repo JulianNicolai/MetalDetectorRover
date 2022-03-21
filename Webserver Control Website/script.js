@@ -51,7 +51,10 @@ function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: coords.latitude, lng: coords.longitude },
         zoom: 18,
+        mapTypeId: 'satellite'
     });
+
+    map.setTilt(0);
 
     infoWindow = new google.maps.InfoWindow();
 
