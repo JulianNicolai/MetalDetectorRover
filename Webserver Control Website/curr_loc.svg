@@ -1,0 +1,19 @@
+<svg width="40px" height="40px" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        #location {
+            transform-origin: center center;
+            animation: waiting-anim 2s ease-in-out 0s infinite;
+            fill: #d61313;
+        }
+
+        @keyframes waiting-anim {
+            0% {transform: scale(1);}
+            50% {transform: scale(2);}
+            100% {transform: scale(1);}
+        }
+
+    </style>
+    
+    <circle id="location" cx="60" cy="60" r="10" />
+    
+</svg>

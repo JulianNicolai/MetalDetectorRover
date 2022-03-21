@@ -1,5 +1,7 @@
 #include "esp_camera.h"
 #include <WiFi.h>
+#include <WebSocketsServer.h>
+#include <ArduinoJson.h>
 
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality
@@ -7,20 +9,101 @@
 //            Partial images will be transmitted if image exceeds buffer size
 //
 
-// Select camera model
-//#define CAMERA_MODEL_WROVER_KIT // Has PSRAM
-//#define CAMERA_MODEL_ESP_EYE // Has PSRAM
-//#define CAMERA_MODEL_M5STACK_PSRAM // Has PSRAM
-//#define CAMERA_MODEL_M5STACK_V2_PSRAM // M5Camera version B Has PSRAM
-//#define CAMERA_MODEL_M5STACK_WIDE // Has PSRAM
-//#define CAMERA_MODEL_M5STACK_ESP32CAM // No PSRAM
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
-//#define CAMERA_MODEL_TTGO_T_JOURNAL // No PSRAM
 
 #include "camera_pins.h"
 
-const char* ssid = "SponseredByDoubleStuffedOreos";
-const char* password = "1969moon";
+//const char* ssid = "SponseredByDoubleStuffedOreos";
+//const char* password = "1969moon";
+const char* ssid = "Basestation";
+const char* password = "basestation";
+
+WebSocketsServer webSocket = WebSocketsServer(8080);
+
+DynamicJsonDocument doc_in(96);
+
+const int LED_FLASH = 4;
+
+void motorDirection(int analogInputX, int analogInputY) {
+  Serial.printf("X: %d   Y: %d\n", analogInputX, analogInputY);
+}
+
+void updateFlash(bool flashStatus) {
+  digitalWrite(LED_FLASH, flashStatus);
+}
+
+void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
+  // Figure out the type of WebSocket event
+  switch (type) {
+
+    // Client has disconnected
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] Disconnected!\n", num);
+      break;
+
+    // New client has connected
+    case WStype_CONNECTED:
+      {
+        IPAddress ip = webSocket.remoteIP(num);
+        Serial.printf("[%u] Connection from ", num);
+        Serial.println(ip.toString());
+      }
+      break;
+
+    // Echo text message back to client
+    case WStype_TEXT: {
+
+        DeserializationError error = deserializeJson(doc_in, payload);
+
+        if (error) {
+          Serial.print("JSON Deserialization Error: ");
+          Serial.println(error.f_str());
+          return;
+        }
+
+        int jsonPayloadType = doc_in["type"];
+        char result[100];
+        char message0[64];
+        char message1[100];
+
+        if (jsonPayloadType == 0) {
+
+          DynamicJsonDocument doc_out0(128);
+          DynamicJsonDocument doc_out1(128);
+          
+          int axisX = doc_in["payload"]["analog"][0];
+          int axisY = doc_in["payload"]["analog"][1];
+          bool flashStatus = doc_in["payload"]["flash"];
+          updateFlash(flashStatus);
+          motorDirection(axisX, axisY);
+//          doc_out0["type"] = 1;
+//          doc_out0["payload"][0] = 45.384492;
+//          doc_out0["payload"][1] = -75.698446;
+//          serializeJson(doc_out0, message0);
+//          sprintf(result, "ESP32 Received: X: %d  Y: %d  F: %d", axisX, axisY, flashStatus);
+//          doc_out1["type"] = 0;
+//          doc_out1["payload"] = result;
+//          serializeJson(doc_out1, message1);
+        }
+
+//        Serial.printf("[%u] Text: %s\n", num, payload);
+//        Serial.printf("[%u] Result: %s\n", num, result);
+//        webSocket.sendTXT(num, message1);
+//        webSocket.broadcastTXT(message0);
+        break;
+      }
+
+    // For everything else: do nothing
+    case WStype_BIN:
+    case WStype_ERROR:
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+    default:
+      break;
+  }
+}
 
 void startCameraServer();
 
@@ -50,10 +133,10 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  
+
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
-  if(psramFound()){
+  if (psramFound()) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
@@ -63,10 +146,7 @@ void setup() {
     config.fb_count = 1;
   }
 
-#if defined(CAMERA_MODEL_ESP_EYE)
-  pinMode(13, INPUT_PULLUP);
-  pinMode(14, INPUT_PULLUP);
-#endif
+  pinMode(LED_FLASH, OUTPUT);
 
   // camera init
   esp_err_t err = esp_camera_init(&config);
@@ -105,9 +185,11 @@ void setup() {
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
+
+  webSocket.begin();
+  webSocket.onEvent(onWebSocketEvent);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  delay(10000);
+  webSocket.loop();
 }

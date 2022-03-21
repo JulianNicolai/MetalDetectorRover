@@ -116,6 +116,8 @@ body {
 }
 
 #console {
+    display: flex;
+    flex-direction: column-reverse;
     margin: 10px 10px 10px 10px;
     height: calc(100% - 20px);
     width: 100%;

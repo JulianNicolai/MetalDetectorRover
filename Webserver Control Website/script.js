@@ -7,13 +7,18 @@ let axesDot;
 let flash;
 let flashStatus = 0;
 let lastButtonB = 0;
+let lastAnalogAxis = [0, 0];
 let consoleDisplay;
 let consoleColorState = 0;
 let intervals = [];
+let CoordListGPS = [];
+let currLocation;
+const baseAddress = "192.168.0.242";
+
 
 function displayConsole(eventType, eventText) {
-    eventType = "EVENT";
-    eventText = "Some text about the event.";
+    // eventType = "EVENT";
+    // eventText = "Some text about the event.";
     let currTime = new Date().toTimeString().slice(0, 8);
     consoleDisplay.innerHTML = "<div class='console-entry" + consoleColorState + "'>" + currTime + ": &lt;" + eventType + "&gt; " + eventText + "</div>" + consoleDisplay.innerHTML;
     consoleColorState = consoleColorState ? 0 : 1;
@@ -34,7 +39,9 @@ function mapAxesToVisual(axes) {
 function update() {
     let gp = navigator.getGamepads()[0];
     mapAxesToVisual(gp.axes);
+    let flashUpdated = false;
     if (gp.buttons[1].value && !lastButtonB) {
+        flashUpdated = true;
         if (flashStatus) {
             flash.setAttribute("fill", "#3b3b3b");
             flashStatus = 0;
@@ -44,6 +51,12 @@ function update() {
         }
     }
     lastButtonB = gp.buttons[1].value;
+    analogAxis = [Math.round(gp.axes[0] * 1023), Math.round(gp.axes[1] * 1023)];
+    if (analogAxis[0] != lastAnalogAxis[0] || analogAxis[1] != lastAnalogAxis[1] || flashUpdated) {
+        packet = JSON.stringify({"type": 0, "payload": {"analog": analogAxis, "flash": flashStatus}});
+        socket.send(packet);
+        lastAnalogAxis = analogAxis;
+    }
 }
 
 function initMap() {
@@ -81,6 +94,12 @@ function initMap() {
         }
     });
 
+    currLocation = new google.maps.Marker({
+        position: {lat: 0, lng: 0},
+        map,
+        title: `Current location: ${0}, ${0}`,
+        icon: "curr_loc.svg"
+    });
 }
 
 function gamepadConnect(e) {
@@ -101,7 +120,7 @@ function gamepadDisconnect(e) {
     inactiveCtrlElement.style.display = "block";
 }
 
-window.onload = () => {
+window.addEventListener('DOMContentLoaded', (event) => {
     window.addEventListener("gamepadconnected", gamepadConnect);
     window.addEventListener("gamepaddisconnected", gamepadDisconnect);
 
@@ -112,5 +131,74 @@ window.onload = () => {
     flash = document.getElementById("flash-cir");
     consoleDisplay = document.getElementById("console");
 
-    intervals[1] = setInterval(displayConsole, 1000);
-};
+    // intervals[1] = setInterval(displayConsole, 1000);
+
+    document.getElementById('stream').src = `http://${baseAddress}:81/stream`;
+});
+
+const socket = new WebSocket('ws://192.168.0.242:8080');
+
+// Connection opened
+socket.addEventListener('open', function (event) {
+    socket.send('Hello Server!');
+});
+
+// Listen for messages
+socket.addEventListener('message', function (event) {
+    // console.log('Message from server ', event.data);
+    let json;
+    try {
+        json = JSON.parse(event.data);
+        switch (json.type) {
+            case 0:
+                displayConsole("UPDATE", json.payload);
+                break;
+            case 1: {
+                
+                let latitude = json.payload[0];
+                let longitude = json.payload[1];
+
+                displayConsole("METAL DETECT", `Detected metal at: ${latitude}, ${longitude}`);
+                
+                let unique = true;
+                for (let coord of CoordListGPS) {
+                    if (coord[0] == latitude && coord[1] == longitude) {
+                        unique = false;
+                        break;
+                    }
+                }
+
+                if (unique) {
+                    CoordListGPS.push([latitude, longitude]);
+                    new google.maps.Marker({
+                        position: {lat: latitude, lng: longitude},
+                        map,
+                        title: `Location ${CoordListGPS.length} @ ${latitude}, ${longitude}`,
+                        icon: "metal.svg"
+                    });
+                }
+                break;
+            }
+            case 2: {
+
+                // let latitude = json.payload[0] + ((Math.random() - 0.5 ) / 1000);
+                // let longitude = json.payload[1] + ((Math.random() - 0.5 ) / 1000);
+                let latitude = json.payload[0];
+                let longitude = json.payload[1];
+
+                displayConsole("LOCATION", `Current location: ${latitude}, ${longitude}`);
+
+                let latlng = new google.maps.LatLng(latitude, longitude);
+                currLocation.setPosition(latlng);
+                break;
+            }
+            default:
+                displayConsole("UNKNOWN", event.data);
+                break;
+        }
+    } catch (err) {
+        displayConsole("ERROR", err.message);
+        displayConsole("UNKNOWN", event.data);
+    }
+    
+});
