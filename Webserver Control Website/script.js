@@ -1,9 +1,13 @@
 let map;
 let position;
-let activeCtrlElement;
-let inactiveCtrlElement;
-let axesLine;
-let axesDot;
+// let axesLine;
+// let axesDot;
+let speedBarR;
+let speedBarL;
+let speedometer;
+let turnRadZero;
+let turnRadInf;
+let turnRad;
 let flash;
 let flashStatus = 0;
 let lastButtonB = 0;
@@ -13,7 +17,8 @@ let consoleColorState = 0;
 let intervals = [];
 let CoordListGPS = [];
 let currLocation;
-const baseAddress = "192.168.0.101";
+const topSpeed = 33.6; // top speed in meters/min
+const baseAddress = "192.168.0.242";
 
 
 function displayConsole(eventType, eventText) {
@@ -29,16 +34,98 @@ function convert(num) {
 }
 
 function mapAxesToVisual(axes) {
-    let coords = [convert(axes[0]), convert(axes[1])];
-    axesLine.setAttribute("x2", coords[0]);
-    axesLine.setAttribute("y2", coords[1]);
-    axesDot.setAttribute("cx", coords[0]);
-    axesDot.setAttribute("cy", coords[1]);
+    let coordsXY = [convert(axes[0]), convert(axes[1])];
+    let coordsYY = [convert(axes[1]), convert(axes[3])];
+    // axesLine.setAttribute("x2", coordsXY[0]);
+    // axesLine.setAttribute("y2", coordsXY[1]);
+    // axesDot.setAttribute("cx", coordsXY[0]);
+    // axesDot.setAttribute("cy", coordsXY[1]);
+
+    speedBarL.setAttribute("y2", coordsYY[0]);
+    speedBarR.setAttribute("y2", coordsYY[1]);
+    let currentSpeedMPM = (-axes[1] + -axes[3]) / 2 * topSpeed;
+    let currentSpeedMPS_L = -axes[1] * topSpeed / 60 / 0.56 * 50;
+    let currentSpeedMPS_R = -axes[3] * topSpeed / 60 / 0.56 * 50;
+    let currentSpeedDisplay = (Math.round(currentSpeedMPM * 10) / 10).toFixed(1);
+    speedometer.innerHTML = currentSpeedDisplay;
+
+    let distanceFromCentre;
+    if ((currentSpeedMPS_L == 0 && currentSpeedMPS_R == 0)) {
+        turnRad.style.display = "none";
+        turnRadZero.style.display = "block";
+        turnRadInf.style.display = "none";
+        turnRadSpotCCW.style.display = "none";
+        turnRadSpotCW.style.display = "none";
+
+    } 
+    else if ((currentSpeedMPS_L + currentSpeedMPS_R) < 1) { // fix this for reverse directions!
+        turnRad.style.display = "none";
+        turnRadZero.style.display = "none";
+        turnRadInf.style.display = "none";
+        if (currentSpeedMPS_L > currentSpeedMPS_R) {
+            turnRadSpotCCW.style.display = "none";
+            turnRadSpotCW.style.display = "block";
+        } else {
+            turnRadSpotCCW.style.display = "block";
+            turnRadSpotCW.style.display = "none";
+        }
+        
+    } 
+    else if (Math.abs(currentSpeedMPS_L - currentSpeedMPS_R) < 2) {
+        turnRad.style.display = "none";
+        turnRadZero.style.display = "none";
+        turnRadInf.style.display = "block";
+        turnRadSpotCCW.style.display = "none";
+        turnRadSpotCW.style.display = "none";
+
+    } else if (currentSpeedMPS_L < currentSpeedMPS_R) {
+        turnRad.style.display = "block";
+        turnRadZero.style.display = "none";
+        turnRadInf.style.display = "none";
+        turnRadSpotCCW.style.display = "none";
+        turnRadSpotCW.style.display = "none";
+
+        distanceFromCentre = currentSpeedMPS_R * 100 / (currentSpeedMPS_R - currentSpeedMPS_L) - 50;
+        if (distanceFromCentre < 0) { 
+            turnRad.setAttribute("cx", (60 + Math.abs(distanceFromCentre)).toString());
+        } else {
+            turnRad.setAttribute("cx", (60 - distanceFromCentre).toString());
+        }
+        turnRad.setAttribute("r", Math.abs(distanceFromCentre).toString());
+
+    } else {
+        turnRad.style.display = "block";
+        turnRadZero.style.display = "none";
+        turnRadInf.style.display = "none";
+        turnRadSpotCCW.style.display = "none";
+        turnRadSpotCW.style.display = "none";
+
+        distanceFromCentre = currentSpeedMPS_L * 100 / (currentSpeedMPS_L - currentSpeedMPS_R) - 50;
+        if (distanceFromCentre < 0) { 
+            turnRad.setAttribute("cx", (60 - Math.abs(distanceFromCentre)).toString());
+        } else {
+            turnRad.setAttribute("cx", (60 + distanceFromCentre).toString());
+        }
+        turnRad.setAttribute("r", Math.abs(distanceFromCentre).toString());
+    }
+    // console.log(currentSpeedMPS_L, currentSpeedMPS_R, distanceFromCentre);
 }
 
 function update() {
     let gp = navigator.getGamepads()[0];
-    mapAxesToVisual(gp.axes);
+    let axes = [0, 0, 0, 0];
+    for (let i = 0; i < gp.axes.length; i++) {
+        let axis = gp.axes[i];
+        if (-0.25 < axis && axis < 0.25) {
+            axes[i] = 0;
+        } else if (axis > 0.25) {
+            axes[i] = (axis - 0.25) / 0.75;
+        } else {
+            axes[i] = (axis + 0.25) / 0.75;
+        }
+    }
+    mapAxesToVisual(axes);
+
     let flashUpdated = false;
     if (gp.buttons[1].value && !lastButtonB) {
         flashUpdated = true;
@@ -51,12 +138,11 @@ function update() {
         }
     }
     lastButtonB = gp.buttons[1].value;
-    analogAxis = [Math.round(gp.axes[0] * 1023), Math.round(gp.axes[1] * 1023)];
-    if (analogAxis[0] != lastAnalogAxis[0] || analogAxis[1] != lastAnalogAxis[1] || flashUpdated) {
-        packet = JSON.stringify({"type": 0, "payload": {"analog": analogAxis, "flash": flashStatus}});
-        socket.send(packet);
-        lastAnalogAxis = analogAxis;
-    }
+    analogAxis = [Math.round(axes[1] * 1023), Math.round(axes[3] * 1023)];
+    // if (analogAxis[0] != lastAnalogAxis[0] || analogAxis[1] != lastAnalogAxis[1] || flashUpdated) {}
+    packet = JSON.stringify({"type": 0, "payload": {"analog": analogAxis, "flash": flashStatus}});
+    socket.send(packet);
+    // lastAnalogAxis = analogAxis;
 }
 
 function initMap() {
@@ -104,34 +190,43 @@ function initMap() {
 
 function gamepadConnect(e) {
     intervals[0] = setInterval(update, 20);
-    console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-        e.gamepad.index, e.gamepad.id,
-        e.gamepad.buttons.length, e.gamepad.axes.length);
-    activeCtrlElement.style.display = "block";
-    inactiveCtrlElement.style.display = "none";
+    console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
+    let activeArr = document.getElementsByClassName("active-controller");
+    let inactiveArr = document.getElementsByClassName("inactive-controller");
+    for (let i = 0; i < activeArr.length; i++) {
+        activeArr[i].style.display = "block";
+        inactiveArr[i].style.display = "none";
+    }
     let axes = e.gamepad.axes;
     mapAxesToVisual(axes);
 }
 
 function gamepadDisconnect(e) {
-    console.log("Gamepad disconnected from index %d: %s",
-        e.gamepad.index, e.gamepad.id);
-    activeCtrlElement.style.display = "none";
-    inactiveCtrlElement.style.display = "block";
+    console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
+    let activeArr = document.getElementsByClassName("active-controller");
+    let inactiveArr = document.getElementsByClassName("inactive-controller");
+    for (let i = 0; i < activeArr.length; i++) {
+        activeArr[i].style.display = "block";
+        inactiveArr[i].style.display = "none";
+    }
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {
     window.addEventListener("gamepadconnected", gamepadConnect);
     window.addEventListener("gamepaddisconnected", gamepadDisconnect);
 
-    activeCtrlElement = document.getElementById("active-controller");
-    inactiveCtrlElement = document.getElementById("inactive-controller");
-    axesLine = document.getElementById("dir-line");
-    axesDot = document.getElementById("dir-dot");
+    // axesLine = document.getElementById("dir-line");
+    // axesDot = document.getElementById("dir-dot");
     flash = document.getElementById("flash-cir");
+    speedBarR = document.getElementById("speedbar-right");
+    speedBarL = document.getElementById("speedbar-left");
+    speedometer = document.getElementById("speedometer");
+    turnRadZero = document.getElementById("turn-radius-zero");
+    turnRadInf = document.getElementById("turn-radius-inf");
+    turnRadSpotCW = document.getElementById("turn-radius-spot-cw");
+    turnRadSpotCCW = document.getElementById("turn-radius-spot-ccw");
+    turnRad = document.getElementById("turn-radius");
     consoleDisplay = document.getElementById("console");
-
-    // intervals[1] = setInterval(displayConsole, 1000);
 
     document.getElementById('stream').src = `http://${baseAddress}:81/stream`;
 });
