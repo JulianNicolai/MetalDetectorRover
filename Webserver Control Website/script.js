@@ -13,7 +13,7 @@ let consoleColorState = 0;
 let intervals = [];
 let CoordListGPS = [];
 let currLocation;
-const baseAddress = "192.168.0.242";
+const baseAddress = "192.168.0.101";
 
 
 function displayConsole(eventType, eventText) {
@@ -136,7 +136,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('stream').src = `http://${baseAddress}:81/stream`;
 });
 
-const socket = new WebSocket('ws://192.168.0.242:8080');
+const socket = new WebSocket(`ws://${baseAddress}:8080`);
 
 // Connection opened
 socket.addEventListener('open', function (event) {
