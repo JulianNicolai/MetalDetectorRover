@@ -8,7 +8,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Roboto:wght@400&display=swap" rel="stylesheet">
         <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
         <script src="./script.js"></script>
     </head>
@@ -29,7 +29,7 @@
                             <style>
                                 #waiting {
                                     transform-origin: center center;
-                                    animation: waiting-anim 4s ease-in-out 0.5s infinite;
+                                    animation: waiting-anim 4s linear infinite;
                                 }
                         
                                 @keyframes waiting-anim {
@@ -37,15 +37,35 @@
                                     50% {transform: scale(5);}
                                     100% {transform: scale(1);}
                                 }
-                        
-                                #active-controller {
-                                    display: none;
+
+                                #turn-radius-spot-cw {
+                                    transform-box: fill-box;
+                                    transform-origin: center;
+                                    animation: rotation-cw 2s linear infinite;
                                 }
                         
-                                #inactive-controller {
-                                    display: block;
+                                @keyframes rotation-cw {
+                                    0% {transform: rotate(0deg);}
+                                    100% {transform: rotate(360deg);}
+                                }
+
+                                #turn-radius-spot-ccw {
+                                    transform-box: fill-box;
+                                    transform-origin: center;
+                                    animation: rotation-ccw 2s linear infinite;
+                                }
+                        
+                                @keyframes rotation-ccw {
+                                    0% {transform: rotate(0deg);}
+                                    100% {transform: rotate(-360deg);}
                                 }
                             </style>
+
+                            <defs>
+                                <clipPath id="turn-radius-clip">
+                                    <circle cx="60" cy="60" r="50"/>
+                                </clipPath>
+                            </defs> 
                             
                             <g>
                                 <circle cx="60" cy="60" r="50" fill="#3b3b3b"/>
@@ -53,22 +73,105 @@
                                 <line x1="109.5" y1="60" x2="10.5" y2="60" stroke-width="1" stroke="#8d8d8d" stroke-linecap="round"/>
                             </g>
                         
-                            <g id="active-controller">
-                                <line id="dir-line" x1="60" y1="60" x2="70" y2="30" stroke-width="3" stroke="#ad0202" stroke-linecap="round"/>
-                                <circle id="dir-dot" cx="70" cy="30" r="4" fill="#ad0202"/>
-                            </g>
-                        
-                            <g id="inactive-controller">
-                                <circle id="waiting" cx="60" cy="60" r="8" fill="#0b58fd"/>
+                            <g class="active-controller">
+                                <!-- <line id="dir-line" x1="60" y1="60" x2="70" y2="30" stroke-width="3" stroke="#ad0202" stroke-linecap="round"/>
+                                <circle id="dir-dot" cx="70" cy="30" r="4" fill="#ad0202"/> -->
                             </g>
                             
+                            <circle id="turn-radius-zero" cx="60" cy="60" r="4" fill="#db1212"/>
+                            <circle id="turn-radius" clip-path="url(#turn-radius-clip)" cx="-40" cy="60" r="100" stroke="#ae00ff" fill="#00000000" stroke-width="2" style="display: none" stroke-dasharray="4"/>
+                            <line id="turn-radius-inf" clip-path="url(#turn-radius-clip)" x1="60" x2="60" y1="5" y2="115" stroke="#ae00ff" stroke-width="2" stroke-dasharray="4" style="display: none"/>
+                            <circle id="turn-radius-spot-cw" cx="60" cy="60" r="50" fill="#00000000" stroke="#ae00ff" stroke-width="4" stroke-dasharray="20" style="display: none" />
+                            <circle id="turn-radius-spot-ccw" cx="60" cy="60" r="50" fill="#00000000" stroke="#ae00ff" stroke-width="4" stroke-dasharray="20" style="display: none" />
+
+                            <g class="inactive-controller">
+                                <circle id="waiting" cx="60" cy="60" r="8" fill="#0b58fd"/>
+                            </g>
                             
                         </svg>
                     </div>
                     
-                    <div class="svg-container">
+                    <!-- <div class="svg-container">
                         <svg id="flash" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
                             <circle id="flash-cir" cx="12" cy="60" r="12" fill="#3b3b3b"/>
+                        </svg>
+                    </div> -->
+
+                    <div class="svg-container">
+                        <svg id="analog-control-2" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <style>
+
+                                .waiting-left {
+                                    transform-origin: center center;
+                                    animation: waiting-anim-left 4s ease-in-out 0.5s infinite;
+                                }
+                        
+                                .waiting-right {
+                                    transform-origin: center center;
+                                    animation: waiting-anim-right 4s ease-in-out 0.5s infinite;
+                                }
+                        
+                                @keyframes waiting-anim-left {
+                                    0% {transform: translateY(0px);}
+                                    50% {transform: translateY(-49.8px);}
+                                    100% {transform: translateY(0px);}
+                                }
+                        
+                                @keyframes waiting-anim-right {
+                                    0% {transform: translateY(0px);}
+                                    50% {transform: translateY(49.8px);}
+                                    100% {transform: translateY(0px);}
+                                }
+                        
+                                .clip-left {
+                                    clip-path: url(#clip-path-left);
+                                }
+                        
+                                .clip-right {
+                                    clip-path: url(#clip-path-right);
+                                }
+                        
+                            </style>
+                        
+                            <defs>
+                                <linearGradient id="linear" gradientTransform="rotate(90)">
+                                    <stop offset="5%"  stop-color="gold" />
+                                    <stop offset="95%" stop-color="red" />
+                                </linearGradient>
+                                <clipPath id="clip-path-left">
+                                    <path d="M 0 20 a 5 5 0 0 1 20 0 l 0 80 a 5 5 0 0 1 -20 0 z"/>
+                                </clipPath>
+                                <clipPath id="clip-path-right">
+                                    <path d="M 100 20 a 5 5 0 0 1 20 0 l 0 80 a 5 5 0 0 1 -20 0 z"/>
+                                </clipPath>
+                            </defs>
+                            
+                            <circle id="flash-cir" cx="60" cy="30" r="12" fill="#3b3b3b"/>
+
+                            <rect x="30" y="60" width="60" height="25" fill="#3b3b3b" stroke="#181818"/>
+
+                            <text id="speedometer" x="83" y="78" text-anchor="end">0.0</text>
+                            <text id="speed-text" x="60" y="92.5" text-anchor="middle">metres/min</text>
+                        
+                            <g class="clip-left active-controller">
+                                <line x1="10" x2="10" y1="10" y2="110" stroke="#3b3b3b" stroke-width="20"/>
+                                <line id="speedbar-left" x1="10" x2="10.00001" y1="60" y2="110" stroke="url(#linear)" stroke-width="20"/>
+                            </g>
+                        
+                            <g class="clip-right active-controller">
+                                <line x1="110" x2="110" y1="10" y2="110" stroke="#3b3b3b" stroke-width="20"/>
+                                <line id="speedbar-right" x1="110" x2="110.00001" y1="60" y2="10" stroke="url(#linear)" stroke-width="20"/>
+                            </g>
+                        
+                            <g class="clip-left inactive-controller">
+                                <line x1="10" x2="10" y1="10" y2="110" stroke="#3b3b3b" stroke-width="20"/>
+                                <line class="waiting-left" x1="10" x2="10" y1="60" y2="109.8" stroke="#0b58fd" stroke-width="19.8"/>
+                            </g>
+                        
+                            <g class="clip-right inactive-controller">
+                                <line x1="110" x2="110" y1="10" y2="110" stroke="#3b3b3b" stroke-width="20"/>
+                                <line class="waiting-right" x1="110" x2="110" y1="60" y2="10.2" stroke="#0b58fd" stroke-width="19.8"/>
+                            </g>
                         </svg>
                     </div>
                 </div>
@@ -81,5 +184,6 @@
             
         </section>
         <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script>
+        <!-- <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script> -->
     </body>
 </html>
