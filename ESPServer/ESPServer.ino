@@ -2,13 +2,18 @@
 #define SER_DATA 14
 #define LATCH 13
 #define SER_CLK 15
-#define PWMA 16
-#define PWMB 2
+//#define PWMA 12
+//#define PWMB 2
 #define GPS_TX 3
 #define GPS_RX 1
 #define MTL_DTCT 12
 
 #define PORT 8080
+
+//#define PWM_FREQ 10000
+//#define PWM_RES 14
+//#define PWM_CHAN_A 7
+//#define PWM_CHAN_B 2
 
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 
@@ -41,8 +46,6 @@ const char* password = "1969moon";
 //const char* ssid = "Basestation";
 //const char* password = "basestation";
 
-
-
 WebSocketsServer webSocket = WebSocketsServer(PORT);
 
 DynamicJsonDocument doc_in(96);
@@ -53,42 +56,28 @@ char message_misc[256];
 
 TinyGPSPlus gps;
 
-void shiftOutCustom(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val) {
-    uint8_t i;
-
-    for(i = 0; i < 8; i++) {
-        if(bitOrder == LSBFIRST)
-            digitalWrite(dataPin, !!(val & (1 << i)));
-        else
-            digitalWrite(dataPin, !!(val & (1 << (7 - i))));
-
-        digitalWrite(clockPin, HIGH);
-        digitalWrite(clockPin, LOW);
-    }
-}
-
 void motorDirection(int analogInputY1, int analogInputY2) {
 
   if (analogInputY1 > 0) { // Motor A clockwise
-    serialArr[4] = 0;
-    serialArr[5] = 1;
+    serialArr[6] = 0;
+    serialArr[7] = 1;
   } else if (analogInputY1 < 0) { // Motor A counter-clockwise
-    serialArr[4] = 1;
-    serialArr[5] = 0;
+    serialArr[6] = 1;
+    serialArr[7] = 0;
   } else { // Motor A stop
-    serialArr[4] = 0;
-    serialArr[5] = 0;
+    serialArr[6] = 0;
+    serialArr[7] = 0;
   }
 
   if (analogInputY2 > 0) { // Motor B clockwise
-    serialArr[6] = 1;
-    serialArr[7] = 0;
+    serialArr[4] = 1;
+    serialArr[5] = 0;
   } else if (analogInputY2 < 0) { // Motor B counter-clockwise
-    serialArr[6] = 0;
-    serialArr[7] = 1;
+    serialArr[4] = 0;
+    serialArr[5] = 1;
   } else { // Motor B stop
-    serialArr[6] = 0;
-    serialArr[7] = 0;
+    serialArr[4] = 0;
+    serialArr[5] = 0;
   }
   
   int serialByte = 0;
@@ -99,16 +88,19 @@ void motorDirection(int analogInputY1, int analogInputY2) {
   }
 
   digitalWrite(LATCH, LOW);
-  shiftOutCustom(SER_DATA, SER_CLK, LSBFIRST, serialByte);
+  shiftOut(SER_DATA, SER_CLK, LSBFIRST, serialByte);
   digitalWrite(LATCH, HIGH);
 
-  doc_out_misc["type"] = 0;
-  doc_out_misc["payload"] = serialByte;
-  serializeJson(doc_out_misc, message_misc);
-  webSocket.sendTXT(connectedClient, message_misc);
+//  doc_out_misc["type"] = 0;
+//  doc_out_misc["payload"] = serialByte;
+//  serializeJson(doc_out_misc, message_misc);
+//  webSocket.sendTXT(connectedClient, message_misc);
 
-//  analogWrite(PWMA, abs(analogInputY1));
-//  analogWrite(PWMB, abs(analogInputY2));
+//  int inY1 = abs(analogInputY1);
+//  int inY2 = abs(analogInputY2);
+//  
+//  ledcWrite(PWMA, inY1);
+//  ledcWrite(PWMB, inY2);
   
 }
 
@@ -216,8 +208,8 @@ void setup() {
   pinMode(SER_DATA, OUTPUT);
   pinMode(LATCH, OUTPUT);
   pinMode(SER_CLK, OUTPUT);
-  pinMode(PWMA, OUTPUT);
-  pinMode(PWMB, OUTPUT);
+//  pinMode(PWMA, OUTPUT);
+//  pinMode(PWMB, OUTPUT);
   pinMode(GPS_TX, INPUT);
   pinMode(GPS_RX, OUTPUT);
   pinMode(MTL_DTCT, INPUT);
@@ -255,13 +247,18 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
 
+//  ledcSetup(PWM_CHAN_A, PWM_FREQ, PWM_RES);
+//  ledcSetup(PWM_CHAN_B, PWM_FREQ, PWM_RES);
+//  ledcAttachPin(PWMA, PWM_CHAN_A);
+//  ledcAttachPin(PWMB, PWM_CHAN_B);
+
   timePrev = millis();
 }
 
 void loop() {
   
   int metalDetectStatus = digitalRead(MTL_DTCT);
-
+  
   while (Serial.available() > 0) {
     gps.encode(Serial.read());
   }

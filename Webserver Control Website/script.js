@@ -144,7 +144,7 @@ function updateESP() {
         }
     }
     lastButtonB = gp.buttons[1].value;
-    analogAxis = [Math.round(axes[1] * 255), Math.round(axes[3] * 255)];
+    analogAxis = [Math.round(axes[1] * 16383), Math.round(axes[3] * 16383)]; // 14 bit resolution
     // if ((analogAxis[0] != lastAnalogAxis[0] && analogAxis[1] != lastAnalogAxis[1]) || flashUpdated) {
         
     // }
@@ -192,7 +192,7 @@ function initMap() {
 
     let currLocIcon = {
         url: "curr_loc.svg", 
-        anchor: new google.maps.Point(0, 0)
+        anchor: new google.maps.Point(15, 15)
     };
 
     currLocation = new google.maps.Marker({
@@ -261,7 +261,7 @@ socket.addEventListener('message', function (event) {
         switch (json.type) {
             case 0:
                 displayConsole("UPDATE", json.payload);
-                console.log("UPDATE", json.payload)
+                console.log("UPDATE", json.payload);
                 break;
             case 1: {
                 
@@ -270,7 +270,7 @@ socket.addEventListener('message', function (event) {
 
                 displayConsole("DETECTED METAL", `Found at: ${latitude}, ${longitude}`);
                 
-                if (!isNaN(latitude) && !isNaN(longitude)) {
+                if (!isNaN(latitude) && !isNaN(longitude) && longitude !== 0 && latitude !== 0) {
 
                     let unique = true;
                     for (let coord of CoordListGPS) {
@@ -308,7 +308,7 @@ socket.addEventListener('message', function (event) {
 
                 displayConsole("LOCATION", `@ ${latitude}, ${longitude} | Sats: ${sats} | Alt: ${alt} | HDOP: ${hdop}`);
 
-                if (!isNaN(latitude) && !isNaN(longitude)) {
+                if (!isNaN(latitude) && !isNaN(longitude) && longitude !== 0 && latitude !== 0) {
                     let latlng = new google.maps.LatLng(latitude, longitude);
                     currLocation.setPosition(latlng);
                     map.setCenter(latlng);
