@@ -16,7 +16,7 @@ let intervals = [];
 let CoordListGPS = [];
 let currLocation;
 const topSpeed = 33.6; // top speed in meters/min
-const baseAddress = "192.168.0.242";
+const baseAddress = "192.168.0.101";
 
 
 function displayConsole(eventType, eventText) {
@@ -134,7 +134,7 @@ function update() {
         }
     }
     lastButtonB = gp.buttons[1].value;
-    analogAxis = [Math.round(axes[1] * 1023), Math.round(axes[3] * 1023)];
+    analogAxis = [Math.round(axes[1] * 255), Math.round(axes[3] * 255)];
     // if (analogAxis[0] != lastAnalogAxis[0] || analogAxis[1] != lastAnalogAxis[1] || flashUpdated) {}
     packet = JSON.stringify({"type": 0, "payload": {"analog": analogAxis, "flash": flashStatus}});
     socket.send(packet);
@@ -211,8 +211,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
     window.addEventListener("gamepadconnected", gamepadConnect);
     window.addEventListener("gamepaddisconnected", gamepadDisconnect);
 
-    // axesLine = document.getElementById("dir-line");
-    // axesDot = document.getElementById("dir-dot");
     flash = document.getElementById("flash-cir");
     speedBarR = document.getElementById("speedbar-right");
     speedBarL = document.getElementById("speedbar-left");
@@ -236,7 +234,6 @@ socket.addEventListener('open', function (event) {
 
 // Listen for messages
 socket.addEventListener('message', function (event) {
-    // console.log('Message from server ', event.data);
     let json;
     try {
         json = JSON.parse(event.data);
