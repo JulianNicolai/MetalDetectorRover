@@ -1,5 +1,6 @@
 let map;
 let position;
+let axes;
 let speedBarR;
 let speedBarL;
 let speedometer;
@@ -107,7 +108,7 @@ function mapAxesToVisual(axes) {
     }
 }
 
-function update() {
+function getAxes() {
     let gp = navigator.getGamepads()[0];
     let axes = [0, 0, 0, 0];
     for (let i = 0; i < gp.axes.length; i++) {
@@ -120,7 +121,16 @@ function update() {
             axes[i] = (axis + 0.25) / 0.75;
         }
     }
+    return axes;
+}
+
+function updateVisuals() {
+    axes = getAxes();
     mapAxesToVisual(axes);
+}
+
+function updateESP() {
+    let gp = navigator.getGamepads()[0];
 
     let flashUpdated = false;
     if (gp.buttons[1].value && !lastButtonB) {
@@ -135,10 +145,14 @@ function update() {
     }
     lastButtonB = gp.buttons[1].value;
     analogAxis = [Math.round(axes[1] * 255), Math.round(axes[3] * 255)];
-    // if (analogAxis[0] != lastAnalogAxis[0] || analogAxis[1] != lastAnalogAxis[1] || flashUpdated) {}
+    // if ((analogAxis[0] != lastAnalogAxis[0] && analogAxis[1] != lastAnalogAxis[1]) || flashUpdated) {
+        
+    // }
+    // lastAnalogAxis = analogAxis;
+
     packet = JSON.stringify({"type": 0, "payload": {"analog": analogAxis, "flash": flashStatus}});
     socket.send(packet);
-    // lastAnalogAxis = analogAxis;
+    console.log(packet);
 }
 
 function initMap() {
@@ -176,16 +190,22 @@ function initMap() {
         }
     });
 
+    let currLocIcon = {
+        url: "curr_loc.svg", 
+        anchor: new google.maps.Point(0, 0)
+    };
+
     currLocation = new google.maps.Marker({
         position: {lat: 0, lng: 0},
         map,
         title: `Current location: ${0}, ${0}`,
-        icon: "curr_loc.svg"
+        icon: currLocIcon
     });
 }
 
 function gamepadConnect(e) {
-    intervals[0] = setInterval(update, 20);
+    intervals.push(setInterval(updateVisuals, 20));
+    intervals.push(setInterval(updateESP, 80));
     console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
     let activeArr = document.getElementsByClassName("active-controller");
     let inactiveArr = document.getElementsByClassName("inactive-controller");
@@ -225,6 +245,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('stream').src = `http://${baseAddress}:81/stream`;
 });
 
+
 const socket = new WebSocket(`ws://${baseAddress}:8080`);
 
 // Connection opened
@@ -240,44 +261,58 @@ socket.addEventListener('message', function (event) {
         switch (json.type) {
             case 0:
                 displayConsole("UPDATE", json.payload);
+                console.log("UPDATE", json.payload)
                 break;
             case 1: {
                 
-                let latitude = json.payload[0];
-                let longitude = json.payload[1];
+                let latitude = json.payload.location[0];
+                let longitude = json.payload.location[1];
 
-                displayConsole("METAL DETECT", `Detected metal at: ${latitude}, ${longitude}`);
+                displayConsole("DETECTED METAL", `Found at: ${latitude}, ${longitude}`);
                 
-                let unique = true;
-                for (let coord of CoordListGPS) {
-                    if (coord[0] == latitude && coord[1] == longitude) {
-                        unique = false;
-                        break;
-                    }
-                }
+                if (!isNaN(latitude) && !isNaN(longitude)) {
 
-                if (unique) {
-                    CoordListGPS.push([latitude, longitude]);
-                    new google.maps.Marker({
-                        position: {lat: latitude, lng: longitude},
-                        map,
-                        title: `Location ${CoordListGPS.length} @ ${latitude}, ${longitude}`,
-                        icon: "metal.svg"
-                    });
+                    let unique = true;
+                    for (let coord of CoordListGPS) {
+                        if (coord[0] == latitude && coord[1] == longitude) {
+                            unique = false;
+                            break;
+                        }
+                    }
+
+                    if (unique) {
+
+                        let metalLocIcon = {
+                            url: "metal.svg", 
+                            anchor: new google.maps.Point(15, 15)
+                        };
+
+                        CoordListGPS.push([latitude, longitude]);
+                        new google.maps.Marker({
+                            position: {lat: latitude, lng: longitude},
+                            map,
+                            title: `Location ${CoordListGPS.length} @ ${latitude}, ${longitude}`,
+                            icon: metalLocIcon
+                        });
+                    }
                 }
                 break;
             }
             case 2: {
 
-                // let latitude = json.payload[0] + ((Math.random() - 0.5 ) / 1000);
-                // let longitude = json.payload[1] + ((Math.random() - 0.5 ) / 1000);
-                let latitude = json.payload[0];
-                let longitude = json.payload[1];
+                let latitude = json.payload.location[0];
+                let longitude = json.payload.location[1];
+                let sats = json.payload.sats;
+                let alt = json.payload.alt;
+                let hdop = json.payload.hdop;
 
-                displayConsole("LOCATION", `Current location: ${latitude}, ${longitude}`);
+                displayConsole("LOCATION", `@ ${latitude}, ${longitude} | Sats: ${sats} | Alt: ${alt} | HDOP: ${hdop}`);
 
-                let latlng = new google.maps.LatLng(latitude, longitude);
-                currLocation.setPosition(latlng);
+                if (!isNaN(latitude) && !isNaN(longitude)) {
+                    let latlng = new google.maps.LatLng(latitude, longitude);
+                    currLocation.setPosition(latlng);
+                    map.setCenter(latlng);
+                }
                 break;
             }
             default:
