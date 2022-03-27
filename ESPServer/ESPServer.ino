@@ -1,7 +1,11 @@
+#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
+
+
 
 //
 // WARNING!!! PSRAM IC required for UXGA resolution and high JPEG quality

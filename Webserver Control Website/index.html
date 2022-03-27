@@ -59,6 +59,7 @@
                                     0% {transform: rotate(0deg);}
                                     100% {transform: rotate(-360deg);}
                                 }
+
                             </style>
 
                             <defs>
@@ -78,7 +79,7 @@
                                 <circle id="dir-dot" cx="70" cy="30" r="4" fill="#ad0202"/> -->
                             </g>
                             
-                            <circle id="turn-radius-zero" cx="60" cy="60" r="4" fill="#db1212"/>
+                            <circle id="turn-radius-zero" cx="60" cy="60" r="4" fill="#ae00ff"/>
                             <circle id="turn-radius" clip-path="url(#turn-radius-clip)" cx="-40" cy="60" r="100" stroke="#ae00ff" fill="#00000000" stroke-width="2" style="display: none" stroke-dasharray="4"/>
                             <line id="turn-radius-inf" clip-path="url(#turn-radius-clip)" x1="60" x2="60" y1="5" y2="115" stroke="#ae00ff" stroke-width="2" stroke-dasharray="4" style="display: none"/>
                             <circle id="turn-radius-spot-cw" cx="60" cy="60" r="50" fill="#00000000" stroke="#ae00ff" stroke-width="4" stroke-dasharray="20" style="display: none" />
@@ -151,7 +152,7 @@
                             <rect x="30" y="60" width="60" height="25" fill="#3b3b3b" stroke="#181818"/>
 
                             <text id="speedometer" x="83" y="78" text-anchor="end">0.0</text>
-                            <text id="speed-text" x="60" y="92.5" text-anchor="middle">metres/min</text>
+                            <text id="speed-text" x="60" y="92.5" text-anchor="middle" color="white">metres/min</text>
                         
                             <g class="clip-left active-controller">
                                 <line x1="10" x2="10" y1="10" y2="110" stroke="#3b3b3b" stroke-width="20"/>
@@ -183,7 +184,7 @@
             </div>
             
         </section>
-        <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZt-CXUjtxZkAV9FLXBHNX30ugvliHxOc&callback=initMap&v=weekly" async></script>
         <!-- <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script> -->
     </body>
 </html>

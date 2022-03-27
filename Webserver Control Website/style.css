@@ -97,11 +97,12 @@ body {
 
 #speedometer {
     font-family: 'Roboto Mono';
+    fill: rgb(165, 165, 165);
 }
 
 #speed-text {
     font: bold 8px 'Roboto';
-    color: black;
+    fill: rgb(165, 165, 165);
 }
 
 #map {

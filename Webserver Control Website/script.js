@@ -1,7 +1,5 @@
 let map;
 let position;
-// let axesLine;
-// let axesDot;
 let speedBarR;
 let speedBarL;
 let speedometer;
@@ -22,8 +20,6 @@ const baseAddress = "192.168.0.242";
 
 
 function displayConsole(eventType, eventText) {
-    // eventType = "EVENT";
-    // eventText = "Some text about the event.";
     let currTime = new Date().toTimeString().slice(0, 8);
     consoleDisplay.innerHTML = "<div class='console-entry" + consoleColorState + "'>" + currTime + ": &lt;" + eventType + "&gt; " + eventText + "</div>" + consoleDisplay.innerHTML;
     consoleColorState = consoleColorState ? 0 : 1;
@@ -34,23 +30,20 @@ function convert(num) {
 }
 
 function mapAxesToVisual(axes) {
-    let coordsXY = [convert(axes[0]), convert(axes[1])];
-    let coordsYY = [convert(axes[1]), convert(axes[3])];
-    // axesLine.setAttribute("x2", coordsXY[0]);
-    // axesLine.setAttribute("y2", coordsXY[1]);
-    // axesDot.setAttribute("cx", coordsXY[0]);
-    // axesDot.setAttribute("cy", coordsXY[1]);
-
-    speedBarL.setAttribute("y2", coordsYY[0]);
-    speedBarR.setAttribute("y2", coordsYY[1]);
-    let currentSpeedMPM = (-axes[1] + -axes[3]) / 2 * topSpeed;
-    let currentSpeedMPS_L = -axes[1] * topSpeed / 60 / 0.56 * 50;
-    let currentSpeedMPS_R = -axes[3] * topSpeed / 60 / 0.56 * 50;
+    let speedBarAxes_L = (-axes[1] + 1) * 50 + 10;
+    let speedBarAxes_R = (-axes[3] + 1) * 50 + 10;
+    speedBarL.setAttribute("y2", speedBarAxes_L);
+    speedBarR.setAttribute("y2", speedBarAxes_R);
+    // metres per minute
+    let currentSpeedMPM = (axes[1] + axes[3]) / 2 * topSpeed; // calcuate current net speed magnitude (average of tracks)
+    let currentSpeedMPS_L = axes[1] * topSpeed / 60 / 0.56 * 50;
+    let currentSpeedMPS_R = axes[3] * topSpeed / 60 / 0.56 * 50;
     let currentSpeedDisplay = (Math.round(currentSpeedMPM * 10) / 10).toFixed(1);
     speedometer.innerHTML = currentSpeedDisplay;
 
     let distanceFromCentre;
     if ((currentSpeedMPS_L == 0 && currentSpeedMPS_R == 0)) {
+        // rover not moving
         turnRad.style.display = "none";
         turnRadZero.style.display = "block";
         turnRadInf.style.display = "none";
@@ -59,6 +52,7 @@ function mapAxesToVisual(axes) {
 
     } 
     else if ((currentSpeedMPS_L + currentSpeedMPS_R) < 1) { // fix this for reverse directions!
+        // rover spinning in place
         turnRad.style.display = "none";
         turnRadZero.style.display = "none";
         turnRadInf.style.display = "none";
@@ -72,6 +66,7 @@ function mapAxesToVisual(axes) {
         
     } 
     else if (Math.abs(currentSpeedMPS_L - currentSpeedMPS_R) < 2) {
+        // going straight forward or backward
         turnRad.style.display = "none";
         turnRadZero.style.display = "none";
         turnRadInf.style.display = "block";
@@ -79,6 +74,7 @@ function mapAxesToVisual(axes) {
         turnRadSpotCW.style.display = "none";
 
     } else if (currentSpeedMPS_L < currentSpeedMPS_R) {
+        // turning a specified curve left (left slower than right)
         turnRad.style.display = "block";
         turnRadZero.style.display = "none";
         turnRadInf.style.display = "none";
@@ -94,6 +90,7 @@ function mapAxesToVisual(axes) {
         turnRad.setAttribute("r", Math.abs(distanceFromCentre).toString());
 
     } else {
+        // turning a specified curve right (right slower than left)
         turnRad.style.display = "block";
         turnRadZero.style.display = "none";
         turnRadInf.style.display = "none";
@@ -108,14 +105,13 @@ function mapAxesToVisual(axes) {
         }
         turnRad.setAttribute("r", Math.abs(distanceFromCentre).toString());
     }
-    // console.log(currentSpeedMPS_L, currentSpeedMPS_R, distanceFromCentre);
 }
 
 function update() {
     let gp = navigator.getGamepads()[0];
     let axes = [0, 0, 0, 0];
     for (let i = 0; i < gp.axes.length; i++) {
-        let axis = gp.axes[i];
+        let axis = -1 * gp.axes[i];
         if (-0.25 < axis && axis < 0.25) {
             axes[i] = 0;
         } else if (axis > 0.25) {
