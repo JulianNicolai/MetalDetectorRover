@@ -1,0 +1,28 @@
+<svg id="gps-stats" viewBox="0 0 173 120" xmlns="http://www.w3.org/2000/svg">
+    <style>
+
+        .display-text {
+            font-size: 10px;
+        }
+
+    </style>
+    
+    <rect x="0" y="0" width="240" height="120" fill="#a0a0a0" stroke="#181818"/>
+    <rect x="16" y="16" width="100" height="18" fill="#3b3b3b" stroke="#181818"/>
+    <rect x="16" y="51" width="100" height="18" fill="#3b3b3b" stroke="#181818"/>
+    <rect x="16" y="85" width="55" height="18" fill="#3b3b3b" stroke="#181818"/>
+    <rect x="133" y="16" width="23" height="18" fill="#3b3b3b" stroke="#181818"/>
+    <rect x="133" y="51" width="40" height="18" fill="#3b3b3b" stroke="#181818"/>
+
+    <text class="display-val" id="display-lat" x="112" y="30" text-anchor="end">45.34891033</text>
+    <text class="display-val" id="display-lng" x="112" y="65" text-anchor="end">-75.71426233</text>
+    <text class="display-val" id="display-sats" x="152" y="30" text-anchor="end">30</text>
+    <text class="display-val" id="display-alt" x="67" y="99" text-anchor="end">3098.5</text>
+    <text class="display-val" id="display-hdop" x="168" y="65" text-anchor="end">1430</text>
+
+    <text class="display-text" x="16" y="13" text-anchor="start" color="white">Latitude</text>
+    <text class="display-text" x="16" y="48" text-anchor="start" color="white">Longitude</text>
+    <text class="display-text" x="16" y="83" text-anchor="start" color="white">Altitude</text>
+    <text class="display-text" x="133" y="13" text-anchor="start" color="white">Sats</text>
+    <text class="display-text" x="133" y="48" text-anchor="start" color="white">HDOP</text>
+</svg>

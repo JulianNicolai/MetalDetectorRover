@@ -8,6 +8,11 @@ let turnRadZero;
 let turnRadInf;
 let turnRad;
 let flash;
+let displayLat;
+let displayLng;
+let displayAlt;
+let displaySats;
+let displayHDOP;
 let flashStatus = 0;
 let lastButtonB = 0;
 let lastAnalogAxis = [0, 0];
@@ -143,6 +148,7 @@ function updateESP() {
             flashStatus = 1;
         }
     }
+
     lastButtonB = gp.buttons[1].value;
     analogAxis = [Math.round(axes[1] * 16383), Math.round(axes[3] * 16383)]; // 14 bit resolution
     // if ((analogAxis[0] != lastAnalogAxis[0] && analogAxis[1] != lastAnalogAxis[1]) || flashUpdated) {
@@ -205,7 +211,7 @@ function initMap() {
 
 function gamepadConnect(e) {
     intervals.push(setInterval(updateVisuals, 20));
-    intervals.push(setInterval(updateESP, 80));
+    intervals.push(setInterval(updateESP, 50));
     console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
     let activeArr = document.getElementsByClassName("active-controller");
     let inactiveArr = document.getElementsByClassName("inactive-controller");
@@ -225,6 +231,10 @@ function gamepadDisconnect(e) {
         activeArr[i].style.display = "block";
         inactiveArr[i].style.display = "none";
     }
+    for (let interval of intervals) {
+        clearInterval(interval);
+    }
+    intervals = [];
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {
@@ -240,6 +250,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
     turnRadSpotCW = document.getElementById("turn-radius-spot-cw");
     turnRadSpotCCW = document.getElementById("turn-radius-spot-ccw");
     turnRad = document.getElementById("turn-radius");
+    displayLat = document.getElementById("display-lat");
+    displayLng = document.getElementById("display-lng");
+    displayAlt = document.getElementById("display-alt");
+    displaySats = document.getElementById("display-sats");
+    displayHDOP = document.getElementById("display-hdop");
     consoleDisplay = document.getElementById("console");
 
     document.getElementById('stream').src = `http://${baseAddress}:81/stream`;
@@ -307,6 +322,18 @@ socket.addEventListener('message', function (event) {
                 let hdop = json.payload.hdop;
 
                 displayConsole("LOCATION", `@ ${latitude}, ${longitude} | Sats: ${sats} | Alt: ${alt} | HDOP: ${hdop}`);
+                
+                let latStr = isNaN(latitude) ? "-" : latitude.toFixed(8);
+                let lngStr = isNaN(longitude) ? "-" : longitude.toFixed(8);
+                let satsStr = isNaN(sats) ? "-" : sats.toString();
+                let altStr = isNaN(alt) ? "-" : alt.toFixed(1);
+                let hdopStr = isNaN(hdop) ? "-" : hdop.toString();
+
+                displayLat.innerHTML = latStr + "&deg;";
+                displayLng.innerHTML = lngStr + "&deg;";
+                displayAlt.innerHTML = altStr;
+                displaySats.innerHTML = satsStr;
+                displayHDOP.innerHTML = hdopStr;
 
                 if (!isNaN(latitude) && !isNaN(longitude) && longitude !== 0 && latitude !== 0) {
                     let latlng = new google.maps.LatLng(latitude, longitude);

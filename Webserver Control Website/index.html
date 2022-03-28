@@ -23,7 +23,7 @@
                         <img id="stream" src="http://192.168.0.102:81/stream">
                     </div>
                 </div>
-                <div id="controls" class="grid-item">
+                <div id="controls">
                     <div class="svg-container">
                         <svg id="analog-control" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
                             <style>
@@ -91,12 +91,6 @@
                             
                         </svg>
                     </div>
-                    
-                    <!-- <div class="svg-container">
-                        <svg id="flash" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                            <circle id="flash-cir" cx="12" cy="60" r="12" fill="#3b3b3b"/>
-                        </svg>
-                    </div> -->
 
                     <div class="svg-container">
                         <svg id="analog-control-2" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
@@ -175,6 +169,30 @@
                             </g>
                         </svg>
                     </div>
+
+                    <div class="svg-container">
+                        <svg id="gps-stats" viewBox="0 0 176 120" xmlns="http://www.w3.org/2000/svg">
+
+                            <rect x="9" y="16" width="115" height="18" fill="#3b3b3b" stroke="#181818"/>
+                            <rect x="9" y="51" width="115" height="18" fill="#3b3b3b" stroke="#181818"/>
+                            <rect x="9" y="85" width="58" height="18" fill="#3b3b3b" stroke="#181818"/>
+                            <rect x="134" y="16" width="24" height="18" fill="#3b3b3b" stroke="#181818"/>
+                            <rect x="134" y="51" width="41" height="18" fill="#3b3b3b" stroke="#181818"/>
+                        
+                            <text class="display-val" id="display-lat" x="122" y="30" text-anchor="end">45.34891033&deg;</text>
+                            <text class="display-val" id="display-lng" x="122" y="65" text-anchor="end">-75.71426233&deg;</text>
+                            <text class="display-val" id="display-alt" x="63" y="99" text-anchor="end">8888.8</text>
+                            <text class="display-val" id="display-sats" x="154" y="30" text-anchor="end">88</text>
+                            <text class="display-val" id="display-hdop" x="171" y="65" text-anchor="end">1408</text>
+                        
+                            <text class="display-label" x="9" y="13" text-anchor="start" color="white">Latitude</text>
+                            <text class="display-label" x="9" y="48" text-anchor="start" color="white">Longitude</text>
+                            <text class="display-label" x="9" y="83" text-anchor="start" color="white">Altitude [m]</text>
+                            <text class="display-label" x="134" y="13" text-anchor="start" color="white">Sats</text>
+                            <text class="display-label" x="134" y="48" text-anchor="start" color="white">HDOP</text>
+                        
+                        </svg>
+                    </div>
                 </div>
                 <div id="detections" class="grid-item">
                     <div id="console">
@@ -184,7 +202,7 @@
             </div>
             
         </section>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZt-CXUjtxZkAV9FLXBHNX30ugvliHxOc&callback=initMap&v=weekly" async></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script>
         <!-- <script src="https://maps.googleapis.com/maps/api/js?key=XXX&callback=initMap&v=weekly" async></script> -->
     </body>
 </html>

@@ -2,7 +2,13 @@ body {
     font-family: Roboto,Arial,Helvetica,sans-serif;
     background: #181818;
     color: #EFEFEF;
-    font-size: 16px
+    font-size: 16px;
+    min-width: calc(25vh * 7);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
 }
 
 #stream {
@@ -21,16 +27,8 @@ body {
     justify-content:center;
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
 .svg-container {
-    float: left;
+    display: inline-block;
 }
 
 .location-button {
@@ -58,11 +56,22 @@ body {
     height: 25vh;
     width: auto;
 }
-/* 
-#flash {
+
+#gps-stats {
     height: 25vh;
     width: auto;
-} */
+}
+
+.display-val {
+    font-family: 'Roboto Mono';
+    font-size: 14px;
+    fill: rgb(165, 165, 165);
+}
+
+.display-label {
+    font: bold 8px 'Roboto';
+    fill: rgb(165, 165, 165);
+}
 
 .active-controller {
     display: none;
@@ -111,6 +120,7 @@ body {
     height: 25%;
     max-height: 25vh;
     width: 50vw;
+    overflow: hidden;
 }
 
 #detections {
